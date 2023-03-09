@@ -10,15 +10,20 @@ export const useAuth = ({ middleware, redirectIfAuthenticated } = {}) => {
         data: user,
         error,
         mutate,
-    } = useSWR('/api/user', () =>
-        axios
-            .get('/api/user')
-            .then(res => res.data)
-            .catch(error => {
-                if (error.response.status !== 409) throw error
+    } = useSWR(
+        '/api/user',
+        url =>
+            axios
+                .get(url)
+                .then(res => res.data)
+                .catch(error => {
+                    if (error.response.status !== 409) throw error
 
-                router.push('/verify-email')
-            }),
+                    router.push('/verify-email')
+                }),
+        {
+            // shouldRetryOnError: false,
+        },
     )
 
     const csrf = () => axios.get('/sanctum/csrf-cookie')
