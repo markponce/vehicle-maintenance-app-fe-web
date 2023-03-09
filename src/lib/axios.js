@@ -1,3 +1,4 @@
+import delay from '@/utility/delay'
 import Axios from 'axios'
 
 const axios = Axios.create({
@@ -6,6 +7,13 @@ const axios = Axios.create({
         'X-Requested-With': 'XMLHttpRequest',
     },
     withCredentials: true,
+})
+
+axios.interceptors.response.use(async res => {
+    if (process.env.NODE_ENV === 'development') {
+        // await delay(1000)
+    }
+    return res
 })
 
 export default axios
