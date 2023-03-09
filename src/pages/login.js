@@ -50,7 +50,7 @@ const Login = () => {
             <AuthCard
                 logo={
                     <Link href="/">
-                        <ApplicationLogo className="w-20 h-20 fill-current text-gray-500" />
+                        <ApplicationLogo className="h-20 w-20 fill-current text-gray-500" />
                     </Link>
                 }>
                 {/* Session Status */}
@@ -65,7 +65,7 @@ const Login = () => {
                             id="email"
                             type="email"
                             value={email}
-                            className="block mt-1 w-full"
+                            className="mt-1 block w-full"
                             onChange={event => setEmail(event.target.value)}
                             required
                             autoFocus
@@ -82,7 +82,7 @@ const Login = () => {
                             id="password"
                             type="password"
                             value={password}
-                            className="block mt-1 w-full"
+                            className="mt-1 block w-full"
                             onChange={event => setPassword(event.target.value)}
                             required
                             autoComplete="current-password"
@@ -95,7 +95,7 @@ const Login = () => {
                     </div>
 
                     {/* Remember Me */}
-                    <div className="block mt-4">
+                    <div className="mt-4 block">
                         <label
                             htmlFor="remember_me"
                             className="inline-flex items-center">
@@ -115,10 +115,10 @@ const Login = () => {
                         </label>
                     </div>
 
-                    <div className="flex items-center justify-end mt-4">
+                    <div className="mt-4 flex items-center justify-end">
                         <Link
                             href="/forgot-password"
-                            className="underline text-sm text-gray-600 hover:text-gray-900">
+                            className="text-sm text-gray-600 underline hover:text-gray-900">
                             Forgot your password?
                         </Link>
 
