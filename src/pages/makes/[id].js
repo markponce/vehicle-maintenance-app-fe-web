@@ -1,20 +1,8 @@
 import AppLayout from '@/components/Layouts/AppLayout'
 import axios from '@/lib/axios'
 import Head from 'next/head'
-import { useEffect, useState } from 'react'
-import { useRouter } from 'next/router'
 import Label from '@/components/Label'
-import Input from '@/components/Input'
-import InputError from '@/components/InputError'
-import Button from '@/components/Button'
 import ButtonLink from '@/components/ButtonLink'
-import Spinner from '@/components/Spinner'
-import useSWRMutation from 'swr/mutation'
-import toast, { Toaster } from 'react-hot-toast'
-import delay from '@/utility/delay'
-import { useStoreMake } from '@/hooks/make'
-import useSWR from 'swr'
-import { csrf } from '@/hooks/auth'
 
 const Show = ({ data: selectedMake }) => {
     return (
@@ -50,9 +38,6 @@ const Show = ({ data: selectedMake }) => {
                     <div className="overflow-hidden bg-white shadow-sm  sm:rounded-lg">
                         <div className="border-b border-gray-200  bg-white p-6">
                             <div>
-                                {/* <div>error: {JSON.stringify(error)}</div>
-                                <div>data: {JSON.stringify(selectedMake)}</div> */}
-
                                 <form
                                     className="mb-4 space-y-4"
                                     onSubmit={e => {
@@ -99,27 +84,10 @@ const Show = ({ data: selectedMake }) => {
                                     {/* Name */}
                                     <div className="">
                                         <Label htmlFor="name">Name</Label>
-
                                         <div className="">
-                                            {/* <Input
-                                                disabled
-                                                id="name"
-                                                type="text"
-                                                value={selectedMake?.name}
-                                                className="mt-1 block w-full"
-                                                required
-                                                autoFocus
-                                            /> */}
                                             {selectedMake?.name}
                                         </div>
-
-                                        {/* <InputError
-                                            messages={[]}
-                                            className="mt-2"
-                                        /> */}
                                     </div>
-
-                                    {/* <div className=" mt-2 text-right"></div> */}
                                 </form>
                             </div>
                         </div>
