@@ -1,12 +1,10 @@
 import AppLayout from '@/components/Layouts/AppLayout'
 import Head from 'next/head'
-// import { format, parse, parseISO } from 'date-fns'
-import { formatInTimeZone } from 'date-fns-tz'
-
 import { useGetMakes } from '@/hooks/make'
 import ButtonLink from '@/components/ButtonLink'
 import Spinner from '@/components/Spinner'
 import { formatInTimeZoneUtil } from '@/utility/date-util'
+import Link from 'next/link'
 
 const Make = () => {
     const { makes, error, isLoading } = useGetMakes()
@@ -14,7 +12,21 @@ const Make = () => {
         <AppLayout
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Make - List
+                    <svg
+                        // className=" inline-block"
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="inline h-6 w-6">
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M8.25 6.75h12M8.25 12h12m-12 5.25h12M3.75 6.75h.007v.008H3.75V6.75zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zM3.75 12h.007v.008H3.75V12zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm-.375 5.25h.007v.008H3.75v-.008zm.375 0a.375.375 0 11-.75 0 .375.375 0 01.75 0z"
+                        />
+                    </svg>{' '}
+                    Make List
                 </h2>
             }>
             <Head>
@@ -50,7 +62,7 @@ const Make = () => {
                                         CREATE
                                     </ButtonLink>
                                 </div>
-                                <table className="w-full border-collapse border border-slate-400 bg-white text-sm shadow-sm dark:border-slate-500 dark:bg-slate-800 sm:rounded-lg ">
+                                <table className="w-full border-collapse border border-slate-400 bg-white text-sm shadow-sm dark:border-slate-500 dark:bg-slate-800">
                                     <thead className="bg-slate-50 dark:bg-slate-700">
                                         <tr>
                                             <th className="w-1/2 border border-slate-300 p-4 text-left font-semibold text-slate-900 dark:border-slate-600 dark:text-slate-200">
@@ -64,6 +76,9 @@ const Make = () => {
                                             </th>
                                             <th className="w-1/2 border border-slate-300 p-4 text-left font-semibold text-slate-900 dark:border-slate-600 dark:text-slate-200">
                                                 Updated At
+                                            </th>
+                                            <th className="w-1/2 border border-slate-300 p-4 text-left font-semibold text-slate-900 dark:border-slate-600 dark:text-slate-200">
+                                                Action
                                             </th>
                                         </tr>
                                     </thead>
@@ -98,6 +113,12 @@ const Make = () => {
                                                                 make.updated_at,
                                                             )}
                                                         </time>
+                                                    </td>
+                                                    <td className="border border-slate-300 p-4 text-slate-500 dark:border-slate-700 dark:text-slate-400">
+                                                        <Link
+                                                            href={`/makes/${make.id}`}>
+                                                            EDIT
+                                                        </Link>
                                                     </td>
                                                 </tr>
                                             )
