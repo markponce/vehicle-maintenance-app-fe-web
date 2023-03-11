@@ -9,10 +9,8 @@ import InputError from '@/components/InputError'
 import Button from '@/components/Button'
 import ButtonLink from '@/components/ButtonLink'
 import Spinner from '@/components/Spinner'
-import useSWRMutation from 'swr/mutation'
-import toast, { Toaster } from 'react-hot-toast'
-import delay from '@/utility/delay'
 import { useStoreMake } from '@/hooks/make'
+import { toast } from 'react-toastify'
 
 const Create = () => {
     const router = useRouter()
@@ -21,12 +19,20 @@ const Create = () => {
         throwOnError: false,
         onSuccess: async (data, key, config) => {
             reset()
-            toast.success('A new Make has been created!', { duration: 6000 })
-            await router.replace(`/makes`)
+            toast('A new Make has been created!', {
+                hideProgressBar: true,
+                autoClose: 2000,
+                type: 'success',
+            })
+            await router.replace(`/makes/${data.id}`)
         },
         onError: (err, key, config) => {
             if (typeof err == 'string') {
-                toast.error(err)
+                toast(err, {
+                    hideProgressBar: true,
+                    autoClose: 2000,
+                    type: 'error',
+                })
             }
         },
     })
@@ -34,11 +40,24 @@ const Create = () => {
         <AppLayout
             header={
                 <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Make - Create
+                    <svg
+                        xmlns="http://www.w3.org/2000/svg"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        strokeWidth={1.5}
+                        stroke="currentColor"
+                        className="inline-block h-6 w-6">
+                        <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M12 4.5v15m7.5-7.5h-15"
+                        />
+                    </svg>{' '}
+                    New Make
                 </h2>
             }>
             <Head>
-                <title>Laravel - Make Create</title>
+                <title>Laravel - New Make</title>
             </Head>
             <div className="py-12">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
@@ -54,7 +73,14 @@ const Create = () => {
                                         trigger({ name })
                                     }}>
                                     <div className="flex justify-between">
-                                        <ButtonLink href="/makes" className="">
+                                        <ButtonLink
+                                            style={{
+                                                pointerEvents: isMutating
+                                                    ? 'none'
+                                                    : 'auto',
+                                            }}
+                                            href="/makes"
+                                            className="">
                                             <svg
                                                 xmlns="http://www.w3.org/2000/svg"
                                                 fill="none"
@@ -65,11 +91,11 @@ const Create = () => {
                                                 <path
                                                     strokeLinecap="round"
                                                     strokeLinejoin="round"
-                                                    d="M9 15L3 9m0 0l6-6M3 9h12a6 6 0 010 12h-3"
+                                                    d="M6 18L18 6M6 6l12 12"
                                                 />
                                             </svg>
                                             {'\u00A0'}
-                                            List
+                                            CANCEL
                                         </ButtonLink>
                                         <Button
                                             disabled={isMutating}
