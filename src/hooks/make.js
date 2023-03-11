@@ -62,3 +62,39 @@ export const useStoreMake = (options = {}) => {
         reset,
     }
 }
+
+export const useUpdateMake = ({ makeId, options = {} } = {}) => {
+    const {
+        data: editedMake,
+        error,
+        trigger,
+        isMutating,
+        reset,
+    } = useSWRMutation(
+        ['api/makes', makeId],
+        async ([url, id], { arg }) => {
+            // await delay(1000)
+            try {
+                const response = await axios.put(`${url}/${id}`, arg)
+                return response.data.data
+            } catch (err) {
+                if (err.response.status == 422) {
+                    throw err.response.data.errors
+                }
+                throw err.message
+            }
+        },
+        {
+            throwOnError: true,
+            ...options,
+        },
+    )
+
+    return {
+        editedMake,
+        error,
+        trigger,
+        isMutating,
+        reset,
+    }
+}
