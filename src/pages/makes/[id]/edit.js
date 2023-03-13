@@ -12,9 +12,14 @@ import Spinner from '@/components/Spinner'
 import { useUpdateMake } from '@/hooks/make'
 import { toast } from 'react-toastify'
 import MyModal from '@/components/MyModal'
+import { showErrorPage } from '@/utility/page-util'
 
-const Show = ({ data: selectedMake }) => {
+const Edit = ({ data: selectedMake, err }) => {
     const router = useRouter()
+
+    if (err?.statusCode) {
+        return showErrorPage(err.statusCode)
+    }
 
     const [name, setName] = useState(selectedMake.name)
 
@@ -66,7 +71,7 @@ const Show = ({ data: selectedMake }) => {
                 </h2>
             }>
             <Head>
-                <title>Laravel - Edit Make ID - {selectedMake.id}</title>
+                <title>{`Laravel - Edit Make ID - ${selectedMake.id}`}</title>
             </Head>
             {/* <Toaster /> */}
             <MyModal
@@ -193,14 +198,23 @@ const Show = ({ data: selectedMake }) => {
 export async function getServerSideProps(context) {
     const { query, req } = context
     const { id } = query
-    const res = await axios.get(`api/makes/${id}`, {
-        headers: {
-            origin: process.env.NEXT_PUBLIC_BACKEND_URL,
-            Cookie: req.headers.cookie,
-        },
-    })
-    const data = res.data.data
-    return { props: { data } }
+    try {
+        const res = await axios.get(`api/makes/${id}`, {
+            headers: {
+                origin: process.env.NEXT_PUBLIC_BACKEND_URL,
+                Cookie: req.headers.cookie,
+            },
+        })
+        const data = res.data.data
+        return { props: { data, err: {} } }
+    } catch (e) {
+        return {
+            props: {
+                data: {},
+                err: { statusCode: e.response.status },
+            },
+        }
+    }
 }
 
-export default Show
+export default Edit
