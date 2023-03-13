@@ -158,7 +158,7 @@ const Show = ({ data: selectedMake }) => {
                                         <Label htmlFor="name">Name</Label>
                                         <div className="">
                                             <Input
-                                                placeHolder={
+                                                placeholder={
                                                     'E.g. Yamaha, Honda, Kawasaki, etc...'
                                                 }
                                                 disabled={isMutating}

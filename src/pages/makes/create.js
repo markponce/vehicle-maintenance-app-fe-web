@@ -156,7 +156,7 @@ const Create = () => {
 
                                         <div className="">
                                             <Input
-                                                placeHolder={
+                                                placeholder={
                                                     'E.g. Yamaha, Honda, Kawasaki, etc...'
                                                 }
                                                 disabled={isMutating}
