@@ -11,11 +11,14 @@ import ButtonLink from '@/components/ButtonLink'
 import Spinner from '@/components/Spinner'
 import { useUpdateMake } from '@/hooks/make'
 import { toast } from 'react-toastify'
+import MyModal from '@/components/MyModal'
 
 const Show = ({ data: selectedMake }) => {
     const router = useRouter()
 
     const [name, setName] = useState(selectedMake.name)
+
+    const [isModalOpen, setIsModalOpen] = useState(false)
 
     const { editedMake, error, trigger, isMutating, reset } = useUpdateMake({
         makeId: selectedMake.id,
@@ -66,7 +69,26 @@ const Show = ({ data: selectedMake }) => {
                 <title>Laravel - Edit Make ID - {selectedMake.id}</title>
             </Head>
             {/* <Toaster /> */}
-
+            <MyModal
+                isOpen={isModalOpen}
+                title={<h3 className="text-center">Update Make</h3>}
+                message={<p className="text-center">Are your sure?</p>}
+                // onClose={() => alert(123)}
+                buttons={
+                    <div className="flex justify-between">
+                        <Button onClick={() => setIsModalOpen(false)}>
+                            No
+                        </Button>
+                        <Button
+                            onClick={() => {
+                                setIsModalOpen(false)
+                                trigger({ name })
+                            }}>
+                            Yes
+                        </Button>
+                    </div>
+                }
+            />
             <div className="py-12">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <div className="overflow-hidden bg-white shadow-sm  sm:rounded-lg">
@@ -78,7 +100,7 @@ const Show = ({ data: selectedMake }) => {
                                     className="mb-4 space-y-4"
                                     onSubmit={e => {
                                         e.preventDefault()
-                                        trigger({ name })
+                                        setIsModalOpen(true)
                                     }}>
                                     {/* <ToastContainer /> */}
 
@@ -136,6 +158,9 @@ const Show = ({ data: selectedMake }) => {
                                         <Label htmlFor="name">Name</Label>
                                         <div className="">
                                             <Input
+                                                placeHolder={
+                                                    'E.g. Yamaha, Honda, Kawasaki, etc...'
+                                                }
                                                 disabled={isMutating}
                                                 id="name"
                                                 type="text"
