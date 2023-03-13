@@ -10,8 +10,8 @@ export const useGetMakes = () => {
         isLoading,
         isValidating,
         mutate,
-    } = useSWR('/api/makes', async url => {
-        // await delay(1000)
+    } = useSWR('api/makes', async url => {
+        // await delay(2000)
         try {
             const res = await axios.get(url)
             return res.data.data
@@ -92,6 +92,44 @@ export const useUpdateMake = ({ makeId, options = {} } = {}) => {
 
     return {
         editedMake,
+        error,
+        trigger,
+        isMutating,
+        reset,
+    }
+}
+
+export const useDeleteMake = ({ options = {} } = {}) => {
+    const {
+        data: deleteMake,
+        error,
+        trigger,
+        isMutating,
+        reset,
+    } = useSWRMutation(
+        'api/makes',
+        async (url, { arg }) => {
+            // await delay(1000)
+            // console.log(arg)
+            const { selectedMakeId } = arg
+            try {
+                const response = await axios.delete(`${url}/${selectedMakeId}`)
+                // console.log('Deleted: ', { response })
+                return response.data.data
+            } catch (err) {
+                if (err.response.status == 422) {
+                    throw err.response.data.errors
+                }
+                throw err.message
+            }
+        },
+        {
+            ...options,
+        },
+    )
+
+    return {
+        deleteMake,
         error,
         trigger,
         isMutating,
