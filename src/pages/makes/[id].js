@@ -9,9 +9,13 @@ import { useDeleteMake } from '@/hooks/make'
 import MyModal from '@/components/MyModal'
 import { useRouter } from 'next/router'
 import { toast } from 'react-toastify'
+import { showErrorPage } from '@/utility/page-util'
 
-const Show = ({ data: selectedMake }) => {
+const Show = ({ data: selectedMake, err }) => {
     const router = useRouter()
+    if (err?.statusCode) {
+        return showErrorPage(err.statusCode)
+    }
     const [isModalOpen, setIsModalOpen] = useState(false)
 
     const [selectedMakeId, setSelectedMakeId] = useState(null)
@@ -53,7 +57,7 @@ const Show = ({ data: selectedMake }) => {
                 </h2>
             }>
             <Head>
-                <title>View Make ID - {selectedMake.id}</title>
+                <title>{`View Make ID - ${selectedMake.id}`}</title>
             </Head>
             <MyModal
                 id="delete-modal"
@@ -131,7 +135,7 @@ const Show = ({ data: selectedMake }) => {
                                             </Button>
 
                                             <ButtonLink
-                                                href={`/makes/edit/${selectedMake.id}`}
+                                                href={`/makes/${selectedMake.id}/edit/`}
                                                 className="">
                                                 <svg
                                                     xmlns="http://www.w3.org/2000/svg"
@@ -170,14 +174,23 @@ const Show = ({ data: selectedMake }) => {
 export async function getServerSideProps(context) {
     const { query, req } = context
     const { id } = query
-    const res = await axios.get(`api/makes/${id}`, {
-        headers: {
-            origin: process.env.NEXT_PUBLIC_BACKEND_URL,
-            Cookie: req.headers.cookie,
-        },
-    })
-    const data = res.data.data
-    return { props: { data } }
+    try {
+        const res = await axios.get(`api/makes/${id}`, {
+            headers: {
+                origin: process.env.NEXT_PUBLIC_BACKEND_URL,
+                Cookie: req.headers.cookie,
+            },
+        })
+        const data = res.data.data
+        return { props: { data, err: {} } }
+    } catch (e) {
+        return {
+            props: {
+                data: {},
+                err: { statusCode: e.response.status },
+            },
+        }
+    }
 }
 
 export default Show
