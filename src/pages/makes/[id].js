@@ -104,7 +104,7 @@ const Show = ({ data: selectedMake }) => {
                                             {'\u00A0'}
                                             List
                                         </ButtonLink>
-                                        <div class="space-x-2">
+                                        <div className="space-x-2">
                                             <Button
                                                 onClick={() => {
                                                     setIsModalOpen(true)
