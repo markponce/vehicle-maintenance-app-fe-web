@@ -7,17 +7,49 @@ import { formatInTimeZoneUtil } from '@/utility/date-util'
 import Link from 'next/link'
 import Button from '@/components/Button'
 import MyModal from '@/components/MyModal'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { toast } from 'react-toastify'
+import useSWR, { SWRConfig } from 'swr'
+import axios from '@/lib/axios'
+import { useRouter } from 'next/router'
+import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/20/solid'
+import Label from '@/components/Label'
 
 const Make = () => {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [selectedMakeId, setSelectedMakeId] = useState(null)
-    const { makes, error, isLoading, mutate } = useGetMakes()
+    const router = useRouter()
+    const { page } = router.query
+    const {
+        data: makes,
+        error,
+        isLoading,
+        isValidating,
+        mutate,
+    } = useSWR(
+        page ? `api/makes?page=${page}` : `api/makes?page=1`,
+        async url => {
+            // await delay(2000)
+            // console.log(url)
+            try {
+                const res = await axios.get(url)
+                return res.data
+            } catch (err) {
+                throw err
+            }
+        },
+        {},
+    )
+
+    // useEffect(() => {
+    //     console.log(makes)
+    // }, [makes])
+
     const { trigger } = useDeleteMake({
         options: {
             rollbackOnError: true,
             onSuccess: (data, key, config) => {
+                mutate()
                 toast('Selected Make has been deleted', {
                     hideProgressBar: true,
                     autoClose: 2000,
@@ -33,12 +65,12 @@ const Make = () => {
                     })
                 }
             },
-            revalidate: false,
-            optimisticData: data => {
-                const ret = data.filter(d => d.id != selectedMakeId)
-                setSelectedMakeId(null)
-                return ret
-            },
+            // revalidate: false,
+            // optimisticData: data => {
+            //     const ret = data.filter(d => d.id != selectedMakeId)
+            //     setSelectedMakeId(null)
+            //     return ret
+            // },
         },
     })
 
@@ -52,110 +84,102 @@ const Make = () => {
             <Head>
                 <title>Laravel - Make List</title>
             </Head>
+            <MyModal
+                isOpen={isModalOpen}
+                title={<h3 className="text-center">Delete Make</h3>}
+                message={<p className="text-center">Are your sure?</p>}
+                buttons={
+                    <div className="flex justify-between">
+                        <Button onClick={() => setIsModalOpen(false)}>
+                            No
+                        </Button>
+                        <Button
+                            onClick={() => {
+                                setIsModalOpen(false)
+                                trigger({ selectedMakeId })
+                            }}>
+                            Yes
+                        </Button>
+                    </div>
+                }
+            />
             <div className="py-12">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
                     <div className="overflow-hidden bg-white shadow-sm  sm:rounded-lg">
-                        <div className="border-b border-gray-200  bg-white p-6">
-                            {isLoading && <p>Loading...</p>}
-                            <div>
-                                <div className=" mb-4 text-right">
-                                    <ButtonLink
-                                        // className=""
-                                        className="text-red-600"
-                                        href="makes/create">
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            strokeWidth={1.5}
-                                            stroke="currentColor"
-                                            className="h-6 w-6">
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                d="M12 4.5v15m7.5-7.5h-15"
-                                            />
-                                        </svg>
-                                        {'\u00A0'}
-                                        CREATE
-                                    </ButtonLink>
-                                </div>
-                                <MyModal
-                                    isOpen={isModalOpen}
-                                    title={
-                                        <h3 className="text-center">
-                                            Delete Make
-                                        </h3>
-                                    }
-                                    message={
-                                        <p className="text-center">
-                                            Are your sure?
-                                        </p>
-                                    }
-                                    // onClose={() => alert(123)}
-                                    buttons={
-                                        <div className="flex justify-between">
-                                            <Button
-                                                onClick={() =>
-                                                    setIsModalOpen(false)
-                                                }>
-                                                No
-                                            </Button>
-                                            <Button
-                                                onClick={() => {
-                                                    setIsModalOpen(false)
-                                                    trigger({ selectedMakeId })
-                                                }}>
-                                                Yes
-                                            </Button>
-                                        </div>
-                                    }
-                                />
-                                <table className="w-full border-collapse border border-slate-400 bg-white text-sm shadow-sm dark:border-slate-500 dark:bg-slate-800">
-                                    <thead className="bg-slate-50 dark:bg-slate-700">
+                        <div className=" border-b  border-gray-200 bg-white p-6">
+                            {/* {isLoading && <p>Loading...</p>} */}
+                            {/* {isValidating && <p>isValidating...</p>} */}
+
+                            {/* {JSON.stringify(makes)} */}
+                            <div className=" mb-4 text-right">
+                                <ButtonLink
+                                    // className=""
+                                    className="text-red-600"
+                                    href="makes/create">
+                                    <svg
+                                        xmlns="http://www.w3.org/2000/svg"
+                                        fill="none"
+                                        viewBox="0 0 24 24"
+                                        strokeWidth={1.5}
+                                        stroke="currentColor"
+                                        className="h-6 w-6">
+                                        <path
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                            d="M12 4.5v15m7.5-7.5h-15"
+                                        />
+                                    </svg>
+                                    {'\u00A0'}
+                                    CREATE
+                                </ButtonLink>
+                            </div>
+                            <div className="sm: min-w-sm relative overflow-x-auto shadow-md sm:rounded-lg">
+                                <table className="w-full text-left text-sm text-gray-500 dark:text-gray-400">
+                                    <thead className="bg-gray-50 text-xs uppercase text-gray-700 dark:bg-gray-700 dark:text-gray-400">
                                         <tr>
-                                            <th className="w-1/2 border border-slate-300 p-4 text-center font-semibold text-slate-900 dark:border-slate-600 dark:text-slate-200">
+                                            <th
+                                                scope="col"
+                                                className="px-6 py-3 text-center">
                                                 ID
                                             </th>
-                                            <th className="w-1/2 border border-slate-300 p-4 text-center font-semibold text-slate-900 dark:border-slate-600 dark:text-slate-200">
+                                            <th
+                                                scope="col"
+                                                className="px-6 py-3 text-center">
                                                 Name
                                             </th>
-                                            <th className="w-1/2 border border-slate-300 p-4 text-center font-semibold text-slate-900 dark:border-slate-600 dark:text-slate-200">
+                                            <th
+                                                scope="col"
+                                                className="px-6 py-3 text-center">
                                                 Created At
                                             </th>
-                                            <th className="w-1/2 border border-slate-300 p-4 text-center font-semibold text-slate-900 dark:border-slate-600 dark:text-slate-200">
+                                            <th
+                                                scope="col"
+                                                className="px-6 py-3 text-center">
                                                 Updated At
                                             </th>
                                             <th
                                                 colSpan={2}
-                                                className="w-1/2 border border-slate-300 p-4 text-center font-semibold text-slate-900 dark:border-slate-600 dark:text-slate-200">
+                                                scope="col"
+                                                className="px-6 py-3 text-center">
                                                 Action
                                             </th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {makes?.map(make => {
+                                        {makes?.data.map(make => {
                                             return (
-                                                <tr key={make.id}>
+                                                <tr
+                                                    key={make.id}
+                                                    className="border-b bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-600">
                                                     <td
-                                                        id={`make-${make.id}`}
-                                                        className="border border-slate-300 p-4 text-slate-500 dark:border-slate-700 dark:text-slate-400">
+                                                        scope="row"
+                                                        className="whitespace-nowrap px-6 py-4 text-center font-medium text-gray-900 dark:text-white">
                                                         {make.id}
                                                     </td>
-                                                    <td className="border border-slate-300 p-4 text-slate-500 dark:border-slate-700 dark:text-slate-400">
+                                                    <td className="whitespace-nowrap px-6 py-4  text-center font-medium text-gray-900 dark:text-white">
                                                         {make.name}
                                                     </td>
-                                                    <td className="border border-slate-300 p-4 text-slate-500 dark:border-slate-700 dark:text-slate-400">
-                                                        <time
-                                                            dateTime={formatInTimeZoneUtil(
-                                                                make.created_at,
-                                                            )}>
-                                                            {formatInTimeZoneUtil(
-                                                                make.created_at,
-                                                            )}
-                                                        </time>
-                                                    </td>
-                                                    <td className="border border-slate-300 p-4 text-slate-500 dark:border-slate-700 dark:text-slate-400">
+                                                    <td className="whitespace-nowrap px-6 py-4  text-center font-medium text-gray-900 dark:text-white">
                                                         <time
                                                             dateTime={formatInTimeZoneUtil(
                                                                 make.updated_at,
@@ -165,9 +189,26 @@ const Make = () => {
                                                             )}
                                                         </time>
                                                     </td>
-                                                    <td className="border border-slate-300 p-4 text-slate-500 dark:border-slate-700 dark:text-slate-400">
-                                                        <ButtonLink
-                                                            href={`/makes/${make.id}`}>
+                                                    <td className="whitespace-nowrap px-6 py-4  text-center font-medium text-gray-900 dark:text-white">
+                                                        <time
+                                                            dateTime={formatInTimeZoneUtil(
+                                                                make.updated_at,
+                                                            )}>
+                                                            {formatInTimeZoneUtil(
+                                                                make.updated_at,
+                                                            )}
+                                                        </time>
+                                                    </td>
+                                                    <td className="whitespace-nowrap px-6 py-4  text-center font-medium text-gray-900 dark:text-white">
+                                                        <Link
+                                                            href={`/makes/${make.id}`}
+                                                            className="flex
+                                                            items-center
+                                                            justify-center
+                                                            space-x-1
+                                                            font-medium
+                                                            text-blue-600
+                                                            dark:text-blue-500">
                                                             <svg
                                                                 xmlns="http://www.w3.org/2000/svg"
                                                                 fill="none"
@@ -187,22 +228,23 @@ const Make = () => {
                                                                     strokeLinejoin="round"
                                                                     d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"
                                                                 />
-                                                            </svg>{' '}
-                                                            <span className="ml-1">
-                                                                VIEW
-                                                            </span>
-                                                        </ButtonLink>
+                                                            </svg>
+                                                            <span>View</span>
+                                                        </Link>
                                                     </td>
-                                                    <td className="border border-slate-300 p-4 text-slate-500 dark:border-slate-700 dark:text-slate-400">
-                                                        <Button
-                                                            onClick={() => {
+                                                    <td className="whitespace-nowrap px-6 py-4  text-center font-medium text-gray-900 dark:text-white">
+                                                        <a
+                                                            href="#"
+                                                            onClick={e => {
+                                                                e.preventDefault()
                                                                 setIsModalOpen(
                                                                     true,
                                                                 )
                                                                 setSelectedMakeId(
                                                                     make.id,
                                                                 )
-                                                            }}>
+                                                            }}
+                                                            className="flex items-center justify-center  space-x-1 font-medium text-blue-600 dark:text-blue-500">
                                                             <svg
                                                                 xmlns="http://www.w3.org/2000/svg"
                                                                 fill="none"
@@ -216,50 +258,160 @@ const Make = () => {
                                                                     strokeLinecap="round"
                                                                     strokeLinejoin="round"
                                                                     d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0"
-                                                                />
+                                                                />{' '}
                                                             </svg>
-
-                                                            <span className="ml-1">
-                                                                DELETE
-                                                            </span>
-                                                        </Button>
+                                                            <span>Delete</span>
+                                                        </a>
                                                     </td>
                                                 </tr>
                                             )
                                         })}
-                                        {makes?.length < 1 && (
-                                            <tr>
+                                        {makes?.data.length < 1 && (
+                                            <tr className="border-b bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-600">
                                                 <td
                                                     colSpan={5}
-                                                    className="border border-slate-300 p-4 text-center text-slate-500 dark:border-slate-700 dark:text-slate-400">
+                                                    className="whitespace-nowrap px-6 py-4  text-center font-medium text-gray-900 dark:text-white">
                                                     No Data
                                                 </td>
                                             </tr>
                                         )}
-                                        {isLoading && (
-                                            <tr>
+                                        {/* {(isLoading || isValidating) && (
+                                            <tr className="border-b bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-600">
                                                 <td
                                                     colSpan={5}
-                                                    className=" border border-slate-300 p-4 text-center text-slate-500 dark:border-slate-700 dark:text-slate-400">
-                                                    <div className="flex justify-center">
-                                                        <Spinner />
-                                                    </div>
+                                                    className="whitespace-nowrap px-6 py-4  text-center font-medium text-gray-900 dark:text-white">
+                                                    <Spinner />
                                                 </td>
                                             </tr>
-                                        )}
+                                        )} */}
                                         {error && (
-                                            <tr>
+                                            <tr className="border-b bg-white hover:bg-gray-50 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-600">
                                                 <td
                                                     colSpan={5}
-                                                    className=" border border-slate-300 p-4 text-center text-slate-500 dark:border-slate-700 dark:text-slate-400">
-                                                    <span className="text-sm text-red-600">
-                                                        Error: {error?.message}
-                                                    </span>
+                                                    className="whitespace-nowrap px-6 py-4  text-center font-medium text-gray-900 dark:text-white">
+                                                    Error: {error?.message}
                                                 </td>
                                             </tr>
                                         )}
                                     </tbody>
                                 </table>
+                                <nav
+                                    className="flex items-center justify-between p-2"
+                                    aria-label="Table navigation">
+                                    <span className="text-sm font-normal text-gray-500 dark:text-gray-400">
+                                        Showing{' '}
+                                        <span className="font-semibold text-gray-900">
+                                            {makes?.meta?.from
+                                                ? `${makes?.meta?.from} - ${makes?.meta?.to}`
+                                                : '0'}
+                                        </span>{' '}
+                                        of{' '}
+                                        <span className="font-semibold text-gray-900">
+                                            {makes?.meta?.total ?? '0'}
+                                        </span>
+                                    </span>
+                                    {/* <ul className="inline-flex items-center -space-x-px">
+                                        <li>
+                                            <a
+                                                href="#"
+                                                className="ml-0 block rounded-l-lg border border-gray-300 bg-white px-3 py-2 leading-tight text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                                                <span className="sr-only">
+                                                    Previous
+                                                </span>
+                                                <svg
+                                                    className="h-5 w-5"
+                                                    aria-hidden="true"
+                                                    fill="currentColor"
+                                                    viewBox="0 0 20 20"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <path
+                                                        fillRule="evenodd"
+                                                        d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
+                                                        clipRule="evenodd"
+                                                    />
+                                                </svg>
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a
+                                                href="#"
+                                                className="block border border-gray-300 bg-white px-3 py-2 leading-tight text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                                                1
+                                            </a>
+                                        </li>
+                                        <li>
+                                            <a
+                                                href="#"
+                                                aria-current="page"
+                                                className=" border border-gray-300 bg-blue-50 px-3 py-2 text-blue-600 hover:bg-blue-100 hover:text-blue-700 dark:border-gray-700 dark:bg-gray-700 dark:text-white">
+                                                3
+                                            </a>
+                                        </li>
+
+                                        <li>
+                                            <a
+                                                href="#"
+                                                className="block rounded-r-lg border border-gray-300 bg-white px-3 py-2 leading-tight text-gray-500 hover:bg-gray-100 hover:text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white">
+                                                <span className="sr-only">
+                                                    Next
+                                                </span>
+                                                <svg
+                                                    className="h-5 w-5"
+                                                    aria-hidden="true"
+                                                    fill="currentColor"
+                                                    viewBox="0 0 20 20"
+                                                    xmlns="http://www.w3.org/2000/svg">
+                                                    <path
+                                                        fillRule="evenodd"
+                                                        d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
+                                                        clipRule="evenodd"
+                                                    />
+                                                </svg>
+                                            </a>
+                                        </li>
+                                    </ul> */}
+                                    <ul className="inline-flex items-center -space-x-px">
+                                        {makes?.meta?.links?.map(link => {
+                                            return (
+                                                <Link
+                                                    style={{
+                                                        // cursor: link.url
+                                                        //     ? 'auto'
+                                                        //     : 'not-allowed',
+                                                        pointerEvents: link.url
+                                                            ? 'auto'
+                                                            : 'none',
+                                                    }}
+                                                    key={link.label}
+                                                    aria-selected={
+                                                        +page === +link.label
+                                                    }
+                                                    href={{
+                                                        pathname: 'makes',
+                                                        query: {
+                                                            page: Number.isInteger(
+                                                                +link.label,
+                                                            )
+                                                                ? +link.label
+                                                                : link.label ==
+                                                                  'Next &raquo;'
+                                                                ? makes?.meta
+                                                                      ?.current_page +
+                                                                  1
+                                                                : makes?.meta
+                                                                      ?.current_page -
+                                                                  1,
+                                                        },
+                                                    }}
+                                                    dangerouslySetInnerHTML={{
+                                                        __html: link.label,
+                                                    }}
+                                                    className="block border border-gray-300 bg-white px-3 py-2 leading-tight text-gray-500 first:rounded-l-lg last:rounded-r-lg hover:bg-gray-100 hover:text-gray-700  aria-selected:bg-gray-100 aria-selected:text-gray-700 dark:border-gray-700   dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white aria-selected:dark:bg-gray-700 dark:aria-selected:text-white"
+                                                />
+                                            )
+                                        })}
+                                    </ul>
+                                </nav>
                             </div>
                         </div>
                     </div>
