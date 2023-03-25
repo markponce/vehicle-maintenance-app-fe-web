@@ -92,7 +92,7 @@ const Register = () => {
                             type="password"
                             value={password}
                             className="mt-1 block w-full"
-                            // onChange={() => {}}
+                            onChange={event => setPassword(event.target.value)}
                             required
                             autoComplete="new-password"
                         />
