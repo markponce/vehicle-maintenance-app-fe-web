@@ -1,5 +1,5 @@
 interface Props {
-    messages: string[]
+    messages?: string[]
     className: string
 }
 

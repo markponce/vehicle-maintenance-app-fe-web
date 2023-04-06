@@ -7,7 +7,7 @@ interface Props {
     title: React.ReactNode
     message: React.ReactNode
     buttons: React.ReactNode
-    onClose: () => void
+    onClose?: () => void
 }
 
 export default function MyModal({

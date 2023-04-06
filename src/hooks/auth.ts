@@ -3,6 +3,7 @@ import axios from '@/lib/axios'
 import { useEffect } from 'react'
 import { useRouter } from 'next/router'
 import { ErrorMessages, ResponseWrapper, User } from '@/interfaces/interfaces'
+import { isAxiosError } from 'axios'
 
 interface UseAuthParams {
     middleware?: string
@@ -14,7 +15,6 @@ export const useAuth = ({
     redirectIfAuthenticated,
 }: UseAuthParams = {}) => {
     const router = useRouter()
-
     const {
         data: user,
         error,
@@ -26,8 +26,9 @@ export const useAuth = ({
                 .get(url)
                 .then(res => res.data.data)
                 .catch(error => {
-                    if (error.response.status !== 409) throw error
-
+                    if (error.response?.status !== 409) {
+                        throw error
+                    }
                     router.push('/verify-email')
                 }),
         {
@@ -54,8 +55,9 @@ export const useAuth = ({
             .post('/register', props)
             .then(() => mutate())
             .catch(error => {
-                if (error.response.status !== 422) throw error
-
+                if (error.response.status !== 422) {
+                    throw error
+                }
                 setErrors(error.response.data.errors)
             })
     }
@@ -63,6 +65,7 @@ export const useAuth = ({
     interface LoginParams {
         email: string
         password: string
+        remember: boolean
         setErrors: React.Dispatch<React.SetStateAction<ErrorMessages>>
         setStatus: React.Dispatch<React.SetStateAction<string | null>>
     }
@@ -77,9 +80,17 @@ export const useAuth = ({
             .post('/login', props)
             .then(() => mutate())
             .catch(error => {
-                if (error.response.status !== 422) throw error
-
-                setErrors(error.response.data.errors)
+                if (isAxiosError(error)) {
+                    if (error?.response?.status == 422) {
+                        console.log(error)
+                        const errs = error?.response?.data
+                            .errors as ErrorMessages
+                        setErrors(errs)
+                        return
+                    }
+                }
+                setErrors({})
+                alert(error.message)
             })
     }
 
@@ -134,7 +145,6 @@ export const useAuth = ({
             )
             .catch(error => {
                 if (error.response.status !== 422) throw error
-
                 setErrors(error.response.data.errors)
             })
     }
@@ -160,14 +170,18 @@ export const useAuth = ({
     }
 
     useEffect(() => {
-        if (middleware === 'guest' && redirectIfAuthenticated && user)
+        if (middleware === 'guest' && redirectIfAuthenticated && user) {
             router.push(redirectIfAuthenticated)
+        }
         if (
             window.location.pathname === '/verify-email' &&
             user?.email_verified_at
-        )
+        ) {
             router.push(redirectIfAuthenticated!)
-        if (middleware === 'auth' && error) logout()
+        }
+        if (middleware === 'auth' && error) {
+            logout()
+        }
     }, [user, error])
 
     return {
